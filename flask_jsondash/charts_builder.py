@@ -9,7 +9,6 @@ The chart blueprint that houses all functionality.
 :copyright: (c) 2016 by Chris Tabor.
 :license: MIT, see LICENSE for more details.
 """
-
 import json
 import os
 import uuid
@@ -136,6 +135,7 @@ def ctx():
     return dict(
         static_config=static,
         charts_config=config,
+        charts_custom_options=settings.CHARTS_CUSTOM_OPTIONS,
         page_title='dashboards',
         docs_url=('https://github.com/christabor/flask_jsondash/'
                   'blob/master/docs/'),
@@ -327,6 +327,7 @@ def view(c_id):
         num_rows=(
             None if layout_type == 'freeform' else utils.get_num_rows(viewjson)
         ),
+        charts_custom_options=settings.CHARTS_CUSTOM_OPTIONS,
         modules=utils.sort_modules(viewjson),
         assets=get_active_assets(active_charts),
         can_edit=can_edit,
@@ -472,3 +473,37 @@ def clone(c_id):
     adapter.create(data=data)
     flash('Created new dashboard clone "{}"'.format(newname))
     return redirect(url_for('jsondash.view', c_id=data['id']))
+
+@charts.route('/charts/getCustomOptions/<c_id>', methods=['GET'])
+def getCustomOptions(c_id):
+    """Return a populated html page of the default inputs."""
+    if not auth(authtype='view', view_id=c_id):
+        flash('You do not have access to view these default inputs.', 'error')
+        return redirect(url_for('jsondash.dashboard'))
+    opts = { 'modules.guid': c_id }
+    viewjson = adapter.read(filter=opts)[0]
+    if not viewjson:
+        flash('Could not find view: {}'.format(c_id), 'error')
+        return redirect(url_for('jsondash.dashboard'))
+    # Remove _id, it's not JSON serializeable.
+    if '_id' in viewjson:
+        viewjson.pop('_id')
+    if 'modules' not in viewjson:
+        flash('Invalid configuration - missing modules.', 'error')
+        return redirect(url_for('jsondash.dashboard'))
+    # Chart family is encoded in chart type value for lookup.
+    active_charts = [v.get('family') for v in viewjson['modules']
+                     if v.get('family') is not None]
+    # If the logged in user is also the creator of this dashboard,
+    # let me edit it. Otherwise, defer to any user-supplied auth function
+    # for this specific view.
+    if metadata(key='username') == viewjson.get('created_by'):
+        can_edit = True
+    else:
+        can_edit = auth(authtype='edit_others', view_id=c_id)
+    # Backwards compatible layout type
+    layout_type = viewjson.get('layout', 'freeform')
+    kwargs = dict(
+        module=viewjson.get('modules')[0]
+    )
+    return render_template('partials/form-default-input-modal.html', **kwargs)

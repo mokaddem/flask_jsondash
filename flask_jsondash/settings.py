@@ -245,4 +245,105 @@ CHARTS_CONFIG = {
         'enabled': True,
         'help_link': 'https://plot.ly/javascript/',
     },
+    'jVectorMap': {
+        'charts': [
+            ('jVectorMap', 'jVectorMap World map'),
+        ],
+        'dependencies': [],
+        'js_url': [
+            '//cdn.jsdelivr.net/npm/jvectormap@2.0.4/jquery-jvectormap.min.js',
+            '//jvectormap.com/js/jquery-jvectormap-world-mill.js',
+            '/static/js/vendor/widgets_wrapper/jVectorMap/worldmap.js'
+        ],
+        'css_url': [
+            '//cdnjs.cloudflare.com/ajax/libs/jvectormap/2.0.4/jquery-jvectormap.min.css',
+            '/static/css/vendor/widgets_wrapper/jVectorMap/worldmap.css'
+        ],
+        'enabled': True,
+        'help_link': 'http://jvectormap.com/documentation/',
+    }
+}
+
+CHARTS_CUSTOM_OPTIONS = {
+    'jVectorMap': [
+        {
+            "type": "number",
+            "name": "pollingFrequency",
+            "unit": "ms",
+            "placeholder": "5000",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "Polling frequency",
+            "help_text": "Frequency at which the widget will check if the endpoint is up",
+            "default": "2000"
+        },
+        {
+            "type": "number",
+            "name": "maxMarker",
+            "placeholder": "100",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "Max number of marker",
+            "help_text": "Maximum number of marker drawn in the map",
+            "default": "20"
+        },
+        {
+            "type": "text",
+            "name": "markerColor",
+            "placeholder": "#ffff66, red",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "The markers' color",
+            "default": "#ffff66"
+        },
+        {
+            "type": "number",
+            "name": "markerSize",
+            "unit": "px",
+            "placeholder": "80",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "Size of marker",
+            "help_text": "The marker's size",
+            "default": "160"
+        },
+        {
+            "type": "number",
+            "name": "markerSpeed",
+            "unit": "ms",
+            "placeholder": "600",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "Speed of marker",
+            "help_text": "The marker's animation speed",
+            "default": "2000"
+        },
+        {
+            "type": "text",
+            "name": "scaleColor",
+            "placeholder": "[#color1, #color2, ...]",
+            "validator_regex": None,
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "A custom scale of color for the region",
+            "default": ""
+        }
+    ]
 }

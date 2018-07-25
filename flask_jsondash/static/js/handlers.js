@@ -922,3 +922,34 @@ jsondash.handlers.handlePlotly = function(container, config) {
         jsondash.unload(container);
     });
 };
+
+jsondash.handlers.handleJVectorMap = function(container, config) {
+    'use strict';
+    var options = { endpoint: config.dataSource };
+    options.endpoint = config.dataSource;
+    // merge customOptions in widget's options
+    $.each(config.customOptions, function(index, option) {
+        if (option.default !== undefined && option.default != "") {
+            options[option.name] = option.default;
+        }
+    });
+
+    container
+        .select('.chart-container')
+        .append('div')
+        .classed(jsondash.util.getCSSClasses(config))
+    // adapt header margin
+    var title = $(container.select('.widget-title')[0]);
+    title.css('margin-bottom', '0px');
+
+    var cont = $(container.select('.chart-container')[0]);
+    cont.css('height', config.height-35+'px');
+    cont = cont.find('div');
+    cont.css('height', '100%');
+    console.log(options);
+    cont.worldmap(options);
+
+    // Look for callbacks potentially registered for third party code.
+    jsondash.api.runCallbacks(container, config);
+    jsondash.unload(container);
+};

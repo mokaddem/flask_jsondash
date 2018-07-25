@@ -278,6 +278,7 @@ var jsondash = function() {
             var widget = self.el;
             // Update model data
             self.config = $.extend(self.config, conf);
+            mergeCustomOptions(self.config);
             // Trigger update form into view since data is dirty
             // Update visual size to existing widget.
             loader(widget);
@@ -390,6 +391,7 @@ var jsondash = function() {
         // Shows the response of the API field as a json payload, inline.
         $.ajax({
             type: 'GET',
+            // dataType: 'json',
             url: API_ROUTE_URL.val().trim(),
             success: function(data) {
                 API_PREVIEW.html(prettyCode(data));
@@ -522,6 +524,7 @@ var jsondash = function() {
         // Populate visual GUID
         $('[data-view-chart-guid]').find('.guid-text').text(guid);
         populateOrderField(widget);
+        populateCustomOptions(widget);
         // Update form for specific row if row button was caller
         // Trigger event for select dropdown to ensure any UI is consistent.
         // This is done AFTER the fields have been pre-populated.
@@ -584,6 +587,50 @@ var jsondash = function() {
     }
 
     /**
+     * [populateCustomOptions Destroy and re-create default custom options.]
+     * @param  {[object]} config [The widget config (optional)]
+     */
+    function populateCustomOptions(widget) {
+        var conf = widget.config;
+        // Remove default custom inputs
+        var custom_inputs_container = WIDGET_FORM.find('div.CustomInputContainer');
+        custom_inputs_container.find('form').empty();
+        // Create default inputs only if present
+        if (conf.customOptions !== undefined) {
+            custom_inputs_container.parent().show();
+            $.ajax({
+                url: custom_inputs_container.data('url') + widget.guid,
+                data: {},
+                success: function(html) {
+                    custom_inputs_container.append(html);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        } else {
+            custom_inputs_container.parent().hide();
+        }
+    }
+
+    /**
+     * [mergeCustomOptions Merge DefaultValues into DefaultInputs then delete it.]
+     * @param  {[object]} config [The widget config to be merged]
+     */
+    function mergeCustomOptions(config) {
+        var values = config.defaultValues;
+        if (values === undefined) {
+            return;
+        }
+        var options = config.customOptions;
+        $.each(options, function(index, input) {
+            var corresponding_value = values[input.name];
+            input.default = corresponding_value !== undefined ? corresponding_value : "";
+        });
+        delete config.defaultValues;
+    }
+
+    /**
      * [getParsedFormConfig Get a config usable for each json widget based on the forms active values.]
      * @return {[object]} [The serialized config]
      */
@@ -609,6 +656,11 @@ var jsondash = function() {
             refreshInterval: jsondash.util.intervalStrToMS(form.find('[name="refreshInterval"]').val()),
             classes: getClasses(form)
         };
+        var form_custom_options = WIDGET_FORM.find('#module-form-default-input');
+        var custom_options = {};
+        $.each(form_custom_options.serializeArray(), function (index, elem) { custom_options[elem.name] = elem.value; });
+        conf.defaultValues = custom_options;
+
         if(my.layout === 'grid') {
             conf['row'] = parseNum(form.find('[name="row"]').val());
         }
@@ -892,7 +944,8 @@ var jsondash = function() {
             sigmajs        : jsondash.handlers.handleSigma,
             c3             : jsondash.handlers.handleC3,
             d3             : jsondash.handlers.handleD3,
-            flamegraph     : jsondash.handlers.handleFlameGraph
+            flamegraph     : jsondash.handlers.handleFlameGraph,
+            jvectormap     : jsondash.handlers.handleJVectorMap,
         };
         return handlers[family];
     }
