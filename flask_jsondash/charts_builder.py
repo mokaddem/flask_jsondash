@@ -474,8 +474,8 @@ def clone(c_id):
     flash('Created new dashboard clone "{}"'.format(newname))
     return redirect(url_for('jsondash.view', c_id=data['id']))
 
-@charts.route('/charts/getCustomOptions/<c_id>', methods=['GET'])
-def getCustomOptions(c_id):
+@charts.route('/charts/getWidgetOptions/<c_id>', methods=['GET'])
+def getWidgetOptions(c_id):
     """Return a populated html page of the default inputs."""
     if not auth(authtype='view', view_id=c_id):
         flash('You do not have access to view these default inputs.', 'error')
@@ -485,9 +485,9 @@ def getCustomOptions(c_id):
     if viewjson.count() == 0:
         # Could not find view: c_id, using c_id as a graph type
         kwargs = dict(
-            module={ 'customOptions': settings.CHARTS_CUSTOM_OPTIONS.get(c_id, []) }
+            module={ 'widgetOptions': settings.CHARTS_CUSTOM_OPTIONS.get(c_id, []) }
         )
-        return render_template('partials/form-default-input-modal.html', **kwargs)
+        return render_template('partials/form-widget-input-modal.html', **kwargs)
     else:
         viewjson = viewjson[0]
     # Remove _id, it's not JSON serializeable.
@@ -511,4 +511,4 @@ def getCustomOptions(c_id):
     kwargs = dict(
         module=viewjson.get('modules')[0]
     )
-    return render_template('partials/form-default-input-modal.html', **kwargs)
+    return render_template('partials/form-widget-input-modal.html', **kwargs)

@@ -111,23 +111,23 @@
                         </label>
                     </fieldset>
                 </div>
-                <div class="col-md-12 api-preview-container">
-                    <hr>
-                    <p class='lead clearfix'>Custom options</p>
-                    <div class="CustomInputContainer" data-url="{{ url_for('jsondash.getCustomOptions', c_id='') }}">
-                    </div>
-                </div>
-                <div class="col-md-12 api-preview-container">
-                    <hr>
-                    <p class="lead clearfix">
-                        API response
-                        <span class="pull-right">
-                            <button id="api-output-preview" class="btn btn-xs btn-success">Preview</button>
-                        </span>
-                    </p>
-                    <pre><code id="api-output" class="json">...</code></pre>
-                </div>
             </form>
+            <div class="col-md-12 api-preview-container">
+                <hr>
+                <p class='lead clearfix'>Widget options</p>
+                <div id="WidgetInputContainer" data-url="{{ url_for('jsondash.getWidgetOptions', c_id='') }}">
+                </div>
+            </div>
+            <div class="col-md-12 api-preview-container">
+                <hr>
+                <p class="lead clearfix">
+                    API response
+                    <span class="pull-right">
+                        <button id="api-output-preview" class="btn btn-xs btn-success">Preview</button>
+                    </span>
+                </p>
+                <pre><code id="api-output" class="json">...</code></pre>
+            </div>
             <br>
             <div class="row">
                 <div class="col-md-12">

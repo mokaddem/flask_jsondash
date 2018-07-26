@@ -279,7 +279,7 @@ var jsondash = function() {
             var widget = self.el;
             // Update model data
             self.config = $.extend(self.config, conf);
-            mergeCustomOptions(self.config);
+            mergeWidgetOptions(self.config);
             // Trigger update form into view since data is dirty
             // Update visual size to existing widget.
             loader(widget);
@@ -387,13 +387,13 @@ var jsondash = function() {
         API_PREVIEW_CONT.hide();
     }
 
-    function addCustomOptions(c_id) {
-        var custom_inputs_container = WIDGET_FORM.find('div.CustomInputContainer');
+    function addWidgetOptions(c_id) {
+        var widget_inputs_container = $('#WidgetInputContainer');
         $.ajax({
-            url: custom_inputs_container.data('url') + c_id,
+            url: widget_inputs_container.data('url') + c_id,
             data: {},
             success: function(html) {
-                custom_inputs_container.html(html);
+                widget_inputs_container.html(html);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(textStatus);
@@ -543,7 +543,7 @@ var jsondash = function() {
         // Populate visual GUID
         $('[data-view-chart-guid]').find('.guid-text').text(guid);
         populateOrderField(widget);
-        populateCustomOptions(widget);
+        populateWidgetOptions(widget);
         // Update form for specific row if row button was caller
         // Trigger event for select dropdown to ensure any UI is consistent.
         // This is done AFTER the fields have been pre-populated.
@@ -606,47 +606,47 @@ var jsondash = function() {
     }
 
     /**
-     * [populateCustomOptions Destroy and re-create default custom options.]
+     * [populateWidgetOptions Destroy and re-create default widget options.]
      * @param  {[object]} config [The widget config (optional)]
      */
-    function populateCustomOptions(widget) {
+    function populateWidgetOptions(widget) {
         var conf = widget.config;
-        // Remove default custom inputs
-        var custom_inputs_container = WIDGET_FORM.find('div.CustomInputContainer');
-        custom_inputs_container.find('form').empty();
+        // Remove default widget inputs
+        var widget_inputs_container = $('#WidgetInputContainer');
+        widget_inputs_container.find('form').empty();
         // Create default inputs only if present
-        if (conf.customOptions !== undefined) {
-            custom_inputs_container.parent().show();
+        if (conf.widgetOptions !== undefined) {
+            widget_inputs_container.parent().show();
             $.ajax({
-                url: custom_inputs_container.data('url') + widget.guid,
+                url: widget_inputs_container.data('url') + widget.guid,
                 data: {},
                 success: function(html) {
-                    custom_inputs_container.html(html);
+                    widget_inputs_container.html(html);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(textStatus);
                 }
             });
         } else {
-            custom_inputs_container.parent().hide();
+            widget_inputs_container.parent().hide();
         }
     }
 
     /**
-     * [mergeCustomOptions Merge DefaultValues into DefaultInputs then delete it.]
+     * [mergeWidgetOptions Merge widgetDefaultValues into DefaultInputs then delete it.]
      * @param  {[object]} config [The widget config to be merged]
      */
-    function mergeCustomOptions(config) {
-        var values = config.defaultValues;
+    function mergeWidgetOptions(config) {
+        var values = config.widgetDefaultValues;
         if (values === undefined) {
             return;
         }
-        var options = config.customOptions;
+        var options = config.widgetOptions;
         $.each(options, function(index, input) {
             var corresponding_value = values[input.name];
             input.default = corresponding_value !== undefined ? corresponding_value : "";
         });
-        delete config.defaultValues;
+        delete config.widgetDefaultValues;
     }
 
     /**
@@ -675,10 +675,10 @@ var jsondash = function() {
             refreshInterval: jsondash.util.intervalStrToMS(form.find('[name="refreshInterval"]').val()),
             classes: getClasses(form)
         };
-        var form_custom_options = WIDGET_FORM.find('#module-form-default-input');
-        var custom_options = {};
-        $.each(form_custom_options.serializeArray(), function (index, elem) { custom_options[elem.name] = elem.value; });
-        conf.defaultValues = custom_options;
+        var widget_options = {};
+        $.each($('#module-form-widget-input').serializeArray(), function (index, elem) {
+            widget_options[elem.name] = elem.value; });
+        conf.widgetDefaultValues = widget_options;
 
         if(my.layout === 'grid') {
             conf['row'] = parseNum(form.find('[name="row"]').val());
@@ -737,7 +737,7 @@ var jsondash = function() {
         if (c_id === undefined || c_id === '' || c_type != selected_value) {
             c_id = select.val();
         }
-        addCustomOptions(c_id);
+        addWidgetOptions(c_id);
     }
 
     function populateGridWidthDropdown() {

@@ -928,7 +928,7 @@ jsondash.handlers.handleJVectorMap = function(container, config) {
     var options = { endpoint: config.dataSource };
     options.endpoint = config.dataSource;
     // merge customOptions in widget's options
-    $.each(config.customOptions, function(index, option) {
+    $.each(config.widgetOptions, function(index, option) {
         if (option.default !== undefined && option.default != "") {
             options[option.name] = option.default;
         }
@@ -942,11 +942,11 @@ jsondash.handlers.handleJVectorMap = function(container, config) {
     var title = $(container.select('.widget-title')[0]);
     title.css('margin-bottom', '0px');
 
+    // must enforce height for the widget to work properly
     var cont = $(container.select('.chart-container')[0]);
     cont.css('height', config.height-35+'px');
     cont = cont.find('div');
     cont.css('height', '100%');
-    console.log(options);
     cont.worldmap(options);
 
     // Look for callbacks potentially registered for third party code.
