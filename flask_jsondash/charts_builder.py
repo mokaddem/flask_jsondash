@@ -481,10 +481,15 @@ def getCustomOptions(c_id):
         flash('You do not have access to view these default inputs.', 'error')
         return redirect(url_for('jsondash.dashboard'))
     opts = { 'modules.guid': c_id }
-    viewjson = adapter.read(filter=opts)[0]
-    if not viewjson:
-        flash('Could not find view: {}'.format(c_id), 'error')
-        return redirect(url_for('jsondash.dashboard'))
+    viewjson = adapter.read(filter=opts)
+    if viewjson.count() == 0:
+        # Could not find view: c_id, using c_id as a graph type
+        kwargs = dict(
+            module={ 'customOptions': settings.CHARTS_CUSTOM_OPTIONS.get(c_id, []) }
+        )
+        return render_template('partials/form-default-input-modal.html', **kwargs)
+    else:
+        viewjson = viewjson[0]
     # Remove _id, it's not JSON serializeable.
     if '_id' in viewjson:
         viewjson.pop('_id')

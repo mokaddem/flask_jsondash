@@ -1,4 +1,4 @@
-<select name="type" class="form-control">
+<select id="form-type-select" name="type" class="form-control">
     {% for label, chart_group in charts_config.items() %}
         <optgroup label="{{ label }}">
             {% if chart_group['enabled'] %}

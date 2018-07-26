@@ -18,6 +18,7 @@ var jsondash = function() {
     var MAIN_CONTAINER   = $('#container');
     var EDIT_MODAL       = $('#chart-options');
     var DELETE_BTN       = $('#delete-widget');
+    var FORM_TYPE_SELECT = $('#form-type-select');
     var DELETE_DASHBOARD = $('.delete-dashboard');
     var SAVE_WIDGET_BTN  = $('#save-module');
     var EDIT_CONTAINER   = $('#edit-view-container');
@@ -386,6 +387,20 @@ var jsondash = function() {
         API_PREVIEW_CONT.hide();
     }
 
+    function addCustomOptions(c_id) {
+        var custom_inputs_container = WIDGET_FORM.find('div.CustomInputContainer');
+        $.ajax({
+            url: custom_inputs_container.data('url') + c_id,
+            data: {},
+            success: function(html) {
+                custom_inputs_container.html(html);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+    }
+
     function previewAPIRoute(e) {
         e.preventDefault();
         // Shows the response of the API field as a json payload, inline.
@@ -500,6 +515,8 @@ var jsondash = function() {
             } else {
                 populateRowField();
             }
+            FORM_TYPE_SELECT.data('chart-guid', '')
+            FORM_TYPE_SELECT.data('default-value', '');
             return;
         }
         DELETE_BTN.show();
@@ -509,6 +526,8 @@ var jsondash = function() {
         var widget = my.widgets.get(guid);
         var conf = widget.config;
         populateRowField(conf.row);
+        FORM_TYPE_SELECT.data('chart-guid', guid);
+        FORM_TYPE_SELECT.data('default-value', conf.type);
         // Update the modal fields with this widgets' value.
         $.each(conf, function(field, val){
             if(field === 'override' || field === 'refresh') {
@@ -602,7 +621,7 @@ var jsondash = function() {
                 url: custom_inputs_container.data('url') + widget.guid,
                 data: {},
                 success: function(html) {
-                    custom_inputs_container.append(html);
+                    custom_inputs_container.html(html);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(textStatus);
@@ -709,6 +728,16 @@ var jsondash = function() {
         var active_conf = getParsedFormConfig();
         var previewable = isPreviewableType(active_conf.type);
         togglePreviewOutput(previewable);
+        var select = $(e.target);
+        var selected_value = select.val();
+        var c_id = select.data('chart-guid');
+        var c_type = select.data('default-value');
+        // reset c_id to selected type if not defined
+        // or if we are changing the widget type
+        if (c_id === undefined || c_id === '' || c_type != selected_value) {
+            c_id = select.val();
+        }
+        addCustomOptions(c_id);
     }
 
     function populateGridWidthDropdown() {
