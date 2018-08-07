@@ -508,7 +508,12 @@ def getWidgetOptions(c_id):
         can_edit = auth(authtype='edit_others', view_id=c_id)
     # Backwards compatible layout type
     layout_type = viewjson.get('layout', 'freeform')
+    module = []
+    for m in viewjson.get('modules'):
+        if m['guid'] == c_id:
+            module=m
+            break
     kwargs = dict(
-        module=viewjson.get('modules')[0]
+        module=module
     )
     return render_template('partials/form-widget-input-modal.html', **kwargs)
