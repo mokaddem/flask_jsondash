@@ -59,6 +59,7 @@
     document.addEventListener('DOMContentLoaded', function(e) {
         jsondash.addDomEvents();
         {% if view %}
+        jsondash.defaultWidgetOptions = {{ charts_custom_options|jsonstring|safe}};
         jsondash.loadDashboard({{ view|jsonstring|safe }});
         {% endif %}
     });

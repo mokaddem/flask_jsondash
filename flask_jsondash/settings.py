@@ -261,6 +261,22 @@ CHARTS_CONFIG = {
         ],
         'enabled': True,
         'help_link': 'http://jvectormap.com/documentation/',
+    },
+    'Leaflet': {
+        'charts': [
+            ('Leaflet', 'Leaflet interactive map'),
+        ],
+        'dependencies': [],
+        'js_url': [
+            '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.3/leaflet.js',
+            '/static/js/vendor/widgets_wrapper/Leaflet/leaflet.js'
+        ],
+        'css_url': [
+            '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.3/leaflet.css',
+            '/static/css/vendor/widgets_wrapper/Leaflet/leaflet.css'
+        ],
+        'enabled': True,
+        'help_link': 'https://leafletjs.com/reference-1.3.2.html',
     }
 }
 
@@ -270,7 +286,7 @@ CHARTS_CUSTOM_OPTIONS = {
             "type": "number",
             "name": "pollingFrequency",
             "unit": "ms",
-            "placeholder": "5000",
+            "placeholder": 5000,
             "validator_regex": None,
             "input_classes": [
                 "form-control",
@@ -278,12 +294,12 @@ CHARTS_CUSTOM_OPTIONS = {
             ],
             "label": "Polling frequency",
             "help_text": "Frequency at which the widget will check if the endpoint is up",
-            "default": "2000"
+            "default": 5000
         },
         {
             "type": "number",
             "name": "maxMarker",
-            "placeholder": "100",
+            "placeholder": 100,
             "validator_regex": None,
             "input_classes": [
                 "form-control",
@@ -291,7 +307,7 @@ CHARTS_CUSTOM_OPTIONS = {
             ],
             "label": "Max number of marker",
             "help_text": "Maximum number of marker drawn in the map",
-            "default": "20"
+            "default": 100
         },
         {
             "type": "text",
@@ -309,7 +325,7 @@ CHARTS_CUSTOM_OPTIONS = {
             "type": "number",
             "name": "markerSize",
             "unit": "px",
-            "placeholder": "80",
+            "placeholder": 160,
             "validator_regex": None,
             "input_classes": [
                 "form-control",
@@ -317,13 +333,13 @@ CHARTS_CUSTOM_OPTIONS = {
             ],
             "label": "Size of marker",
             "help_text": "The marker's size",
-            "default": "160"
+            "default": 160
         },
         {
             "type": "number",
             "name": "markerSpeed",
             "unit": "ms",
-            "placeholder": "600",
+            "placeholder": 600,
             "validator_regex": None,
             "input_classes": [
                 "form-control",
@@ -344,6 +360,48 @@ CHARTS_CUSTOM_OPTIONS = {
             ],
             "label": "A custom scale of color for the region",
             "default": ""
+        }
+    ],
+    'Leaflet': [
+        {
+            "type": "text",
+            "name": "osmurl",
+            "default": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "placeholder": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "validator_regex": None,
+            "input_classes": ["form-control", "input-sm"],
+            "label": "A valid osm URL"
+        },
+        {
+            "type": "number",
+            "name": "maxRotation",
+            "placeholder": 10,
+            "validator_regex": None,
+            "input_classes": ["form-control", "input-sm"],
+            "label": "Max rotation",
+            "help_text": "Maximum number of location to show",
+            "default": 10
+        },
+        {
+            "type": "number",
+            "name": "rotationWaitTime",
+            "placeholder": "15000",
+            "unit": "ms",
+            "validator_regex": None,
+            "input_classes": ["form-control", "input-sm"],
+            "label": "Max number of marker",
+            "help_text": "Maximum number of marker drawn in the map",
+            "default": 15000
+        },
+        {
+            "type": "number",
+            "name": "zoomLevel",
+            "placeholder": "[0-13]",
+            "validator_regex": None,
+            "input_classes": ["form-control", "input-sm"],
+            "label": "Zoom level",
+            "help_text": "The zoom level, higher mean closer",
+            "default": 7
         }
     ]
 }

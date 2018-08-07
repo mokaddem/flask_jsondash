@@ -29,6 +29,7 @@ var jsondash = function() {
     var UPDATE_FORM_BTN  = $('#update-module');
     var CHART_TEMPLATE   = $('#chart-template');
     var ROW_TEMPLATE     = $('#row-template').find('.grid-row');
+    var defaultWidgetOptions = {};
     var EVENTS           = {
         init:             'jsondash.init',
         edit_form_loaded: 'jsondash.editform.loaded',
@@ -178,6 +179,7 @@ var jsondash = function() {
         // model for a chart widget
         var self = this;
         self.config = config;
+        self.defaultWidgetOptions = jsondash.defaultWidgetOptions[config.type] ? jsondash.defaultWidgetOptions[config.type] : {};
         self.guid = self.config.guid;
         self.container = container;
         self._refreshInterval = null;
@@ -633,7 +635,7 @@ var jsondash = function() {
     }
 
     /**
-     * [mergeWidgetOptions Merge widgetDefaultValues into DefaultInputs then delete it.]
+     * [mergeWidgetOptions Merge widgetDefaultValues into widgetOptions then delete it.]
      * @param  {[object]} config [The widget config to be merged]
      */
     function mergeWidgetOptions(config) {
@@ -641,8 +643,16 @@ var jsondash = function() {
         if (values === undefined) {
             return;
         }
-        var options = config.widgetOptions;
-        $.each(options, function(index, input) {
+
+        if (config.widgetOptions === undefined) {
+            if (jsondash.defaultWidgetOptions[config.type] !== undefined) {
+                config.widgetOptions = jsondash.defaultWidgetOptions[config.type].slice(0); // cloning the array
+            } else {
+                config.widgetOptions = [];
+            }
+        }
+
+        $.each(config.widgetOptions, function(index, input) {
             var corresponding_value = values[input.name];
             input.default = corresponding_value !== undefined ? corresponding_value : "";
         });
@@ -677,8 +687,10 @@ var jsondash = function() {
         };
         var widget_options = {};
         $.each($('#module-form-widget-input').serializeArray(), function (index, elem) {
-            widget_options[elem.name] = elem.value; });
+            widget_options[elem.name] = elem.value;
+        });
         conf.widgetDefaultValues = widget_options;
+        mergeWidgetOptions(conf);
 
         if(my.layout === 'grid') {
             conf['row'] = parseNum(form.find('[name="row"]').val());
@@ -975,6 +987,7 @@ var jsondash = function() {
             d3             : jsondash.handlers.handleD3,
             flamegraph     : jsondash.handlers.handleFlameGraph,
             jvectormap     : jsondash.handlers.handleJVectorMap,
+            leaflet        : jsondash.handlers.handleLeaflet
         };
         return handlers[family];
     }
