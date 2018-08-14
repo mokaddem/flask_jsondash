@@ -46,6 +46,7 @@
                                         name="{{ input.name }}"
                                         value="{{ input.default }}"
                                         placeholder="{{ input.placeholder }}"
+                                        unit="{{ input.unit }}"
                                         {% if pattern %}pattern="{{ input.validator_regex }}"{% endif %}
                                         >
                                         <span class="input-group-addon">{{ input.unit }}</span>

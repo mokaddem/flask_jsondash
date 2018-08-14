@@ -686,8 +686,17 @@ var jsondash = function() {
             classes: getClasses(form)
         };
         var widget_options = {};
+        var timeIntervalToParse = [];
+        $('#module-form-widget-input').find('[unit="ms"]').each(function(i, elem){
+            timeIntervalToParse.push(elem.name);
+        });
+
         $.each($('#module-form-widget-input').serializeArray(), function (index, elem) {
-            widget_options[elem.name] = elem.value;
+            let val = elem.value;
+            if (timeIntervalToParse.indexOf(elem.name) != -1) {
+                val = jsondash.util.intervalStrToMS(val);
+            }
+            widget_options[elem.name] = val;
         });
         conf.widgetDefaultValues = widget_options;
         mergeWidgetOptions(conf);

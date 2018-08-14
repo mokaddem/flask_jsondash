@@ -358,8 +358,23 @@ CHARTS_CUSTOM_OPTIONS = {
                 "form-control",
                 "input-sm"
             ],
-            "label": "A custom scale of color for the region",
+            "label": "Scale colors",
+            "help_text": "A custom scale of color for the region",
             "default": ""
+        },
+        {
+            "type": "text",
+            "name": "scaleRefresh",
+            "unit": "ms",
+            "placeholder": "1-d",
+            "validator_regex": "\d+(-(s|m|h|d)){0,1}",
+            "input_classes": [
+                "form-control",
+                "input-sm"
+            ],
+            "label": "Scale refresh interval",
+            "help_text": "The time for which the scale will be refreshed",
+            "default": "1-d"
         }
     ],
     'Leaflet': [

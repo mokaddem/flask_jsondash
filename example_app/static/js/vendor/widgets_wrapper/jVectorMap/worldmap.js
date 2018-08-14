@@ -14,6 +14,7 @@
             this._default_options = {
                 pollingFrequency: 5000, // ms
                 scaleColor: ['#003FBF','#0063BF','#0087BF','#00ACBF','#00BFAD','#00BF89','#00BF64','#00BF40','#00BF1C','#08BF00','#2CBF00','#51BF00','#75BF00','#99BF00','#BEBF00','#BF9B00','#BF7700','#BF5200','#BF2E00','#BF0900'],
+                scaleRefresh: 0, // ms
                 markerColor: '#ffff66',
                 maxMarker: 100,
                 markerSize: 80, // px
@@ -145,6 +146,10 @@
                 if (o.markerSpeed !== undefined) {
                     o.markerSpeed = parseInt(o.markerSpeed);
                 }
+
+                if (o.scaleRefresh !== undefined) {
+                    o.scaleRefresh = parseInt(o.scaleRefresh);
+                }
             },
 
             connect_to_data_source: function() {
@@ -243,6 +248,7 @@
                 //Region colors
                 this.regionhits = {};
                 this.regionhitsMax = 10;
+                this.lastRefresh = new Date().getTime(), // ms
 
                 this.validateOptions = function(options) {
                     this._options = options;
@@ -297,6 +303,12 @@
                     } else {
                         this.regionhits[regionCode] = 1;
                     }
+
+                    let now = new Date().getTime();
+                    if (this.lastRefresh + this._options.scaleRefresh <= now) { // refresh scale
+                        this.refresh_scale();
+                    }
+
                     // Force recomputation of min and max for correct color scaling
                     this.regionhitsMax = this.regionhitsMax >= this.regionhits[regionCode] ? this.regionhitsMax : this.regionhits[regionCode];
                     this.openStreetMapObj.series.regions[0].params.max = this.regionhitsMax;
@@ -304,6 +316,17 @@
                     this.openStreetMapObj.series.regions[0].setValues(this.regionhits);
                     this.openStreetMapObj.series.regions[0].legend.render()
                 }
+
+                this.refresh_scale = function() {
+                    this.lastRefresh = new Date().getTime();
+                    for(var reg in this.regionhits) {
+                        if(this.regionhits.hasOwnProperty(reg)) {
+                            this.regionhits[reg] = 0;
+                        }
+                    }
+                    this.regionhitsMax = 10;
+                }
+
             }
         }
 
