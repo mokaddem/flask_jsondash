@@ -12,6 +12,7 @@ The chart blueprint that houses all functionality.
 import json
 import os
 import uuid
+import copy
 from datetime import datetime as dt
 
 import jinja2
@@ -110,18 +111,35 @@ def local_static(chart_config, static_config):
     becomes
     '/static/js/vendor/foo.js'
     """
+    chart_config_copy = copy.deepcopy(chart_config)
     js_path = static_config.get('js_path')
     css_path = static_config.get('css_path')
-    for family, config in chart_config.items():
+    for family, config in chart_config_copy.items():
         if config['js_url']:
             for i, url in enumerate(config['js_url']):
-                url = '{}{}'.format(js_path, url.split('/')[-1])
-                config['js_url'][i] = url_for('static', filename=url)
+                if url.startswith('//'):
+                    fn = '{}{}'.format(js_path, url.split('/')[-1])
+                    sys_path = os.path.join(current_app.root_path, url_for('static', filename=fn)[1:])
+                    if not os.path.isfile(sys_path): # not in local, fetching from CDN
+                        config['js_url'][i] = url
+                    else: # fetch from local
+                        config['js_url'][i] = url_for('static', filename=fn)
+                else:
+                    config['js_url'][i] = url_for('static', filename=url)
+
         if config['css_url']:
             for i, url in enumerate(config['css_url']):
-                url = '{}{}'.format(css_path, url.split('/')[-1])
-                config['css_url'][i] = url_for('static', filename=url)
-    return chart_config
+                if url.startswith('//'):
+                    fn = '{}{}'.format(css_path, url.split('/')[-1])
+                    sys_path = os.path.join(current_app.root_path, url_for('static', filename=fn)[1:])
+                    if not os.path.isfile(sys_path): # not in local, fetching from CDN
+                        config['css_url'][i] = url
+                    else: # fetch from local
+                        config['css_url'][i] = url_for('static', filename=fn)
+                else:
+                    config['css_url'][i] = url_for('static', filename=url)
+
+    return chart_config_copy
 
 
 @charts.context_processor
@@ -219,17 +237,20 @@ def get_active_assets(families):
     families += REQUIRED_STATIC_FAMILES  # Always load internal, shared libs.
     assets = dict(css=[], js=[])
     families = set(families)
-    for family, data in settings.CHARTS_CONFIG.items():
+    # Rewrite the static config paths to be local if the overrides are set.
+    chart_config = (settings.CHARTS_CONFIG if not static
+              else local_static(settings.CHARTS_CONFIG, setting('JSONDASH').get('static')))
+    for family, data in chart_config.items():
         if family in families:
             # Also add all dependency assets.
             if data['dependencies']:
                 for dep in data['dependencies']:
                     assets['css'] += [
-                        css for css in settings.CHARTS_CONFIG[dep]['css_url']
+                        css for css in chart_config[dep]['css_url']
                         if css not in assets['css']]
 
                     assets['js'] += [
-                        js for js in settings.CHARTS_CONFIG[dep]['js_url']
+                        js for js in chart_config[dep]['js_url']
                         if js not in assets['js']
                     ]
             assets['css'] += [

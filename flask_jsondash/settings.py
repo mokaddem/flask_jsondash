@@ -253,11 +253,11 @@ CHARTS_CONFIG = {
         'js_url': [
             '//cdn.jsdelivr.net/npm/jvectormap@2.0.4/jquery-jvectormap.min.js',
             '//jvectormap.com/js/jquery-jvectormap-world-mill.js',
-            '/static/js/vendor/widgets_wrapper/jVectorMap/worldmap.js'
+            'js/vendor/widgets_wrapper/jVectorMap/worldmap.js'
         ],
         'css_url': [
             '//cdnjs.cloudflare.com/ajax/libs/jvectormap/2.0.4/jquery-jvectormap.min.css',
-            '/static/css/vendor/widgets_wrapper/jVectorMap/worldmap.css'
+            'css/vendor/widgets_wrapper/jVectorMap/worldmap.css'
         ],
         'enabled': True,
         'help_link': 'http://jvectormap.com/documentation/',
@@ -269,11 +269,11 @@ CHARTS_CONFIG = {
         'dependencies': [],
         'js_url': [
             '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.3/leaflet.js',
-            '/static/js/vendor/widgets_wrapper/Leaflet/leaflet.js'
+            'js/vendor/widgets_wrapper/Leaflet/leaflet.js'
         ],
         'css_url': [
             '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.3/leaflet.css',
-            '/static/css/vendor/widgets_wrapper/Leaflet/leaflet.css'
+            'css/vendor/widgets_wrapper/Leaflet/leaflet.css'
         ],
         'enabled': True,
         'help_link': 'https://leafletjs.com/reference-1.3.2.html',
@@ -370,7 +370,8 @@ CHARTS_CUSTOM_OPTIONS = {
             "placeholder": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             "validator_regex": None,
             "input_classes": ["form-control", "input-sm"],
-            "label": "A valid osm URL"
+            "label": "OSM URL",
+            "help_text": "A valid osm URL"
         },
         {
             "type": "number",
