@@ -1,0 +1,149 @@
+.treeFromJson .treeDiv {
+    display: inline-block;
+}
+
+.treeFromJson .resultTree {
+    vertical-align: top;
+    display: inline-block;
+}
+
+.treeFromJson .node {
+    cursor: pointer;
+}
+
+.treeFromJson .noInteraction {
+    cursor: default;
+}
+
+.treeFromJson .node circle {
+    fill: #fff;
+    stroke: lightgrey;
+    stroke-width: 3px;
+}
+
+.treeFromJson .node rect {
+    fill: #fff;
+    stroke: lightgrey;
+    stroke-width: 3px;
+}
+
+.treeFromJson .node polygon {
+    fill: #fff;
+    stroke: lightgrey;
+    stroke-width: 3px;
+}
+
+.treeFromJson .node text {
+    font: 12px sans-serif;
+}
+
+.treeFromJson .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
+
+.treeFromJson table.mappingTable {
+    display: inline-table !important;
+    cursor: pointer;
+    margin-bottom: 5px;
+    min-width: 50%;
+    max-width: 75%;
+}
+
+.treeFromJson div.mappingTableDivConfig {
+    border-left: 2px solid lightgrey;
+    display: inline-block;
+    margin-bottom: 0px;
+    margin-left: 10px;
+}
+
+.treeFromJson .mappingTableDivConfig label.fillValue {
+    margin-bottom: 0px;
+    font-size: small;
+    margin-left: 10px;
+}
+
+.treeFromJson .mappingTableDivConfig input.fillValue {
+    padding: 3px 6px;
+    height: 26px;
+    font-size: small;
+    margin-top: -3px;
+    display: inline-block;
+    width: 200px;
+    margin-left: 5px;
+}
+
+
+.treeFromJson .mappingTable td {
+    height: 37px;
+    font-size: medium;
+    border-left: 1px solid #ddd;
+}
+
+.treeFromJson td.grey {
+    filter: opacity(60%) grayscale(30%);
+}
+
+.treeFromJson th.grey {
+    filter: opacity(60%) grayscale(30%);
+}
+
+.treeFromJson .mappingTable td.cellFunInput {
+    padding: 0px;
+    font-family: Consolas,"courier new";
+}
+
+.treeFromJson .cellFunInput textarea {
+    color: black;
+    width: 100%;
+}
+
+.treeFromJson .cellFunInput > span {
+    display: block;
+}
+
+.treeFromJson .funOutputError {
+    color: red;
+    background: white;
+    padding: 3px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.treeFromJson .funResText {
+    font-size: 12px;
+}
+
+.treeFromJson .linkText {
+    /*font-size: 18px;*/
+    fill: #000;
+}
+
+.treeFromJson .rectText {
+    fill: #f5f5f5;
+    stroke: #ddd;
+    stroke-width: 2;
+}
+
+.treeFromJson .linkLabel {
+    cursor: pointer;
+}
+
+.treeFromJson .json_key {
+    color: #690;
+    font-weight: bold;
+}
+
+.treeFromJson .json_string, .json_boolean, .json_number {
+    color: #905;
+}
+
+.treeFromJson .json_null {
+    color: #a8a8a8;
+}
+
+.treeFromJson .jsonDiv {
+    overflow: scroll;
+    margin-bottom: 0px !important;
+}
