@@ -151,7 +151,7 @@
                 var matchingFun = function (intermediate, instructions, additionalData) {
                     let index = instructions;
                     let val;
-                    if (!instructions) { // value is self (intermediate)
+                    if (instructions === false) { // value is self (intermediate)
                         val = intermediate;
                     } else {
                         let reg = /\{(.+)\}/;
@@ -238,7 +238,9 @@
                             kn_strip = kn.slice(1);
                             v = additionalData[kn];
                             v = that.mappingToIndexes[kn_strip][v];
-                            directValue = true;
+                            if (v !== undefined) { // otherwise, could not fetch date (not same branch)
+                                directValue = true;
+                            } 
                         } else {
                             if (kn.substring(0, 2) === '@>') {
                                 kn = '@' + kn.slice(2);

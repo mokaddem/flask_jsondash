@@ -378,7 +378,10 @@
                 var o_depth = d.depth;
                 var c_id = d.id;
                 var c_index = this.find_child_index(d);
+                var c2_isLabel = !Number.isInteger(c_index) && (typeof c_index === 'string');
                 var clicked = d3.select(clickedContext);
+                var clickedParentsList = [];
+                this.find_full_path(d, clickedParentsList);
                 var itemColor = this.itemColors.get(this.currentPicking);
 
                 this.reset_selected();
@@ -396,10 +399,9 @@
                                 return false;
                             }
                             var c1 = d.depth == o_depth;
-                            var c2_childIndexMatch = d.parent.id - c_index -1 == d.id
-
                             // is label
-                            var c2_isLabel = !Number.isInteger(c_index) && (typeof c_index === 'string');
+
+                            var c2_childIndexMatch = c2_isLabel ? false : d.parent.children[c_index].id == d.id;
 
                             // consider linkname if label has been picked manually
                             let il_last = that.instructions.labels.length-1;
@@ -418,6 +420,8 @@
                 } else { // not leaf but children may be leaves
 
                     var child = clicked.data()[0].children[0];
+                    var childParentsList = [];
+                    that.find_full_path(child, childParentsList);
                     var children_are_in_array = Array.isArray(child.children);
                     var children_are_in_obj = child.linkname !== undefined && child.linkname !== '';
                     if (children_are_in_obj || children_are_in_array) { // children are not leaves
@@ -429,7 +433,10 @@
                                     return false;
                                 }
                                 var c1 = d.source.depth == o_depth;
-                                var c2 = d.source.id == c_id;
+                                // var c2 = d.source.id == c_id;
+                                var curParentsList = [];
+                                that.find_full_path(d.source, curParentsList);
+                                var c2 = that.util.arrayCompare(curParentsList, clickedParentsList);
                                 return c1 && c2;
                             });
                         resRect.data().forEach(function(elem) {
@@ -439,14 +446,27 @@
                             elem.picked = that.currentPicking;
                         });
 
+                        // resCircle = that.svg.selectAll(".node polygon, .node circle, .node rect")
+                        //     .filter(function(d) {
+                        //         if (d.parent === undefined || d.parent === null) {
+                        //             return d.id == clicked.data()[0].id;
+                        //         } else {
+                        //             let c1 = d.parent.depth == clicked.data()[0].depth;
+                        //             let c2 = d.parent.id == clicked.data()[0].id;
+                        //             return c1 && c2;
+                        //         }
+                        //     });
                         resCircle = that.svg.selectAll(".node polygon, .node circle, .node rect")
                             .filter(function(d) {
                                 if (d.parent === undefined || d.parent === null) {
                                     return d.id == clicked.data()[0].id;
                                 } else {
                                     let c1 = d.parent.depth == clicked.data()[0].depth;
-                                    let c2 = d.parent.id == clicked.data()[0].id;
-                                    return c1 && c2;
+                                    var curParentsList = [];
+                                    that.find_full_path(d, curParentsList);
+                                    var c2 = that.util.arrayCompare(curParentsList, clickedParentsList);
+                                    var c3 = d.linkname !== undefined && d.linkname !== '';
+                                    return c2 && (c1 || c3);
                                 }
                             });
                         var nodesData = [];
@@ -632,7 +652,8 @@
                 this.set_current_mapping_item(curPickingBackup);
             },
 
-            reset_selected: function() {
+            reset_selected: function(full) {
+                full = full === undefined ? true : full;
                 var that = this;
                 var resNode = that.svg.selectAll(".node circle, .node rect, .node polygon")
                     .filter(function(d) {
@@ -663,8 +684,47 @@
                     elem.picked = '';
                 });
 
-                this.unset_related();
-                this.add_instruction([]);
+                if (full) {
+                    this.unset_related();
+                    this.add_instruction([]);
+                }
+            },
+
+            handleUserManualInput: function(value) {
+                var that = this;
+                let inst = value.split(',');
+                this.add_instruction(inst, false);
+                this.reset_selected(false);
+                // color picked nodes from manual mapping
+                // FIXME: experimental
+                var itemColor = this.itemColors.get(this.currentPicking);
+                var nodeDepth = inst.length;
+                var lastInst = inst[inst.length-1];
+                var lastInstIsLabel = !Number.isInteger(lastInst) && (typeof lastInst === 'string');
+                var resNode = that.svg.selectAll(".node circle")
+                    .filter(function(d) {
+                        var c1 = d.depth == nodeDepth;
+                        var c2;
+                        if (lastInstIsLabel) {
+                            c2 = d.linkname === lastInst;
+                        } else {
+                            c2 = d.parent.children[lastInst].id == d.id;
+                        }
+                        return c1 && c2;
+                    });
+
+                var nodesData = [];
+                if(resNode !== undefined) {
+                    resNode.data().forEach(function(elem) {
+                        if (elem.picked !== undefined  && elem.picked != '') {
+                            console.log('Possible collision with '+elem.picked);
+                        }
+                        elem.picked = that.currentPicking;
+                        nodesData.push(elem);
+                    });
+                }
+
+                resNode.style('fill', itemColor);
             },
 
 
@@ -723,8 +783,7 @@
                     cellB2.append(fun_foot_res);
                     map_input.on('input', function(e) {
                         e.preventDefault();
-                        let inst = this.value.split(',');
-                        that.add_instruction(inst, false);
+                        that.handleUserManualInput(this.value);
                     });
 
                     cellH.click(function() { that.set_current_mapping_item(item); });
@@ -823,7 +882,7 @@
 
             add_prefill_data: function(data) {
                 this.prefillData[this.currentPicking] = data;
-                this.currentPickingCell.val(instructions.toString());
+                this.currentPickingCell.val(data.toString());
                 this.set_current_mapping_item();
                 this.update_result_tree();
             },
@@ -954,9 +1013,11 @@
                             break;
                         }
                     }
-                    let kref = '@'+d_keyname;
-                    adjustedInstructions[v_keyname][matchingIndex] = kref + ',' + adjustedInstructions[v_keyname][matchingIndex];
-                    adjustedInstructions.index[kref] = adjustedInstructions[d_keyname].slice(matchingIndex+1);
+                    if (matchingIndex >= 0) { // not the same branch, can't do anything
+                        let kref = '@'+d_keyname;
+                        adjustedInstructions[v_keyname][matchingIndex] = kref + ',' + adjustedInstructions[v_keyname][matchingIndex];
+                        adjustedInstructions.index[kref] = adjustedInstructions[d_keyname].slice(matchingIndex+1);
+                    }
                 }
 
                 // add '' at the end for date only
@@ -1132,10 +1193,31 @@
                     return pts.join(', ');
                 },
 
+            arrayCompare: function(arr1, arr2) {
+                if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
+                    return false;
+                }
+                if (arr1.length != arr2.length) {
+                    return false;
+                }
+                for (let i=0; i<arr1.length; i++) {
+                    var item1 = arr1[i];
+                    var item2 = arr2[i];
+                    if (Array.isArray(item1) && Array.isArray(item2)) {
+                        // recursion
+                        if (!this.util.arrayCompare(item1, item2)) {
+                            return false; // subarrays are not equal
+                        }
+                    } else if (item1 != item2) {
+                        return false;
+                    }
+                }
+                return true; // all good
             }
 
-
         }
+
+    }
 
         $.treeFromJson = TreeFromJson;
         $.fn.treeFromJson = function(data, option) {
