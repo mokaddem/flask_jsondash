@@ -24,9 +24,10 @@ jsondash.handleRes = function(error, data, container) {
 jsondash.getJSON = function(container, config, callback) {
     var url     = config.dataSource;
     var cached  = config.cachedData;
+    var proxyEnabled = config.proxyMapping !== undefined && config.proxyMapping !== null;
     var err_msg = null;
     if(!url) throw new Error('Invalid URL: ' + url);
-    if(cached && cached !== null && cached !== undefined) {
+    if(cached && cached !== null && cached !== undefined && !proxyEnabled) {
         // Ensure this is not re-used for this cycle. It's somewhat of a pseudo-cache in that sense.
         config.cachedData = null;
         return callback(null, cached);
@@ -34,6 +35,13 @@ jsondash.getJSON = function(container, config, callback) {
     d3.json(url, function(error, data){
         jsondash.handleRes(error, data, container);
         if(error || !data) {
+            return;
+        }
+        result = jsondash.util.applyMapping(config, data)
+        if (!result.error) {
+            data = result.data;
+        } else {
+            jsondash.handleRes(result.error, data, container);
             return;
         }
         callback(error, config.key && data.multicharts[config.key] ? data.multicharts[config.key] : data);

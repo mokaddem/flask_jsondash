@@ -726,6 +726,7 @@
                 }
 
                 resNode.style('fill', itemColor);
+                this.render_functions_output();
             },
 
 
@@ -773,8 +774,7 @@
                 var valueHeader;
                 this.options.toBeMappedList.forEach(function(item, index) {
                     var itemColor = that.options.itemColors[index];
-                    // var cellH = $('<th data-map="'+item+'">'+item+': <span id="'+item+'Cell" data-map="'+item+'" style="font-weight: normal; font-style: italic;"></span> </th>');
-                    var map_input = $('<input id="'+item+'Cell" data-map="'+item+'" style="font-weight: normal; font-style: italic; color:black"></input>');
+                    var map_input = $('<input id="'+item+'Cell" data-map="'+item+'" class="mappingInput fillValue form-control"></input>');
                     var cellH = $('<th data-map="'+item+'">'+item+':  </th>');
                     cellH.append(map_input);
                     var cellB2 = $('<td id="'+item+'CellFun" class="cellFunInput" data-map="'+item+'"></td>');
@@ -806,7 +806,7 @@
                 tbody.append(row2);
                 this.mappingDomTable.append(thead);
                 this.mappingDomTable.append(tbody);
-                this.fillValueDomInput = $('<input class="form-control fillValue" placeholder="0" value="empty">');
+                this.fillValueDomInput = $('<input class="form-control fillValue" placeholder="0" value="0">');
                 var configDiv = $('<div class="form-group mappingTableDivConfig"></div>')
                     .append($('<label class="fillValue">Fill value</label>'))
                     .append(this.fillValueDomInput);
@@ -1106,7 +1106,8 @@
                         }
                         funXInput.text('"'+that.adjust_text_length(x)+'"');
                         funXInput[0].innerHTML = '"'+that.adjust_text_length(x)+'"';
-                        funXOuput[0].innerHTML = that.adjust_text_length('"'+f(x, d)+'"');
+                        var output_value = f(x, d);
+                        funXOuput[0].innerHTML = that.adjust_text_length(output_value);
                     } catch(err) { // Error
                         if (err.name == 'SyntaxError') {
                             flag_continue = false;
@@ -1134,7 +1135,7 @@
                 if (text === undefined || text === '') {
                     return '';
                 }
-                text = new String(text);
+                text = JSON.stringify(text);
                 var textSliced = text.slice(0, this.options.maxCharDisplay);
                 if (text.length > this.options.maxCharDisplay) {
                     textSliced += '...';

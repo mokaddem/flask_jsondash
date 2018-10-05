@@ -11,6 +11,7 @@ var jsondash = function() {
     var API_ROUTE_URL    = $('[name="dataSource"]');
     var API_PREVIEW      = $('#api-output');
     var API_PREVIEW_BTN  = $('#api-output-preview');
+    var API_PROXY_BTN    = $('#api-output-proxy');
     var API_PREVIEW_CONT = $('.api-preview-container');
     var WIDGET_FORM      = $('#module-form');
     var VIEW_BUILDER     = $('#view-builder');
@@ -421,6 +422,36 @@ var jsondash = function() {
         });
     }
 
+    function startMapper(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'GET',
+            // dataType: 'json',
+            url: API_ROUTE_URL.val().trim(),
+            success: function(data) {
+                var callbackFun = function(e, modal) {
+                    var mapping = modal.find('.modal-body').data('treeFromJson').getMapping()
+                    widgetOption = {
+                        config: {
+                            proxyMapping: mapping.mapping,
+                            proxyMappingFun: mapping.functions,
+                        }
+                    };
+                    populateProxyMappingOptions(widgetOption);
+                }
+                var jModal = jsondash.util.quickModal('Proxy mapping', '', {size: 'xxl' }, callbackFun);
+                var jmodalBody = jModal.find('.modal-body');
+                var options = {
+                    toBeMapped: jsondash.util.getPickingList(FORM_TYPE_SELECT.val())
+                }
+                jmodalBody.treeFromJson(data, options);
+            },
+            error: function(data, status, error) {
+                API_PREVIEW.html(error);
+            }
+        });
+    }
+
     function refreshableType(type) {
         if(type === 'youtube') {return false;}
         return true;
@@ -546,6 +577,7 @@ var jsondash = function() {
         $('[data-view-chart-guid]').find('.guid-text').text(guid);
         populateOrderField(widget);
         populateWidgetOptions(widget);
+        populateProxyMappingOptions(widget);
         // Update form for specific row if row button was caller
         // Trigger event for select dropdown to ensure any UI is consistent.
         // This is done AFTER the fields have been pre-populated.
@@ -633,6 +665,31 @@ var jsondash = function() {
             widget_inputs_container.parent().hide();
         }
     }
+    /**
+     * [populateProxyMappingOptions Destroy and re-create default widget options.]
+     * @param  {[object]} config [The widget config (optional)]
+     */
+    function populateProxyMappingOptions(widget) {
+        var mappingConf = widget.config.proxyMapping;
+        var mappingFunConf = widget.config.proxyMappingFun;
+        var btnClass, text, dataMap, dataFun;
+        if (mappingConf === undefined || mappingConf === null || $.isEmptyObject(mappingConf)) {
+            // reset button layout
+            btnClass = 'btn-default';
+            text = 'Local proxy: no mapping';
+            data = {};
+        } else {
+            btnClass = 'btn-primary';
+            text = 'Local proxy: mapped';
+            dataMap = mappingConf;
+            dataFun = mappingFunConf;
+        }
+        API_PROXY_BTN.removeClass('btn-default btn-primary');
+        API_PROXY_BTN.addClass(btnClass);
+        API_PROXY_BTN.text(text);
+        API_PROXY_BTN.data('proxyMapping', dataMap);
+        API_PROXY_BTN.data('proxyMappingFun', dataFun);
+    }
 
     /**
      * [mergeWidgetOptions Merge widgetDefaultValues into widgetOptions then delete it.]
@@ -683,7 +740,9 @@ var jsondash = function() {
             order: parseNum(form.find('[name="order"]').val(), 10),
             refresh: form.find('[name="refresh"]').is(':checked'),
             refreshInterval: jsondash.util.intervalStrToMS(form.find('[name="refreshInterval"]').val()),
-            classes: getClasses(form)
+            classes: getClasses(form),
+            proxyMapping: API_PROXY_BTN.data('proxyMapping') ? API_PROXY_BTN.data('proxyMapping') : null,
+            proxyMappingFun: API_PROXY_BTN.data('proxyMappingFun') ? API_PROXY_BTN.data('proxyMappingFun') : null
         };
         var widget_options = {};
         var timeIntervalToParse = [];
@@ -812,6 +871,7 @@ var jsondash = function() {
         WIDGET_FORM.find('[name="type"]').on('change.charts.type', chartsTypeChanged);
         // TODO: debounce/throttle
         API_PREVIEW_BTN.on('click.charts', previewAPIRoute);
+        API_PROXY_BTN.on('click.charts', startMapper);
         // Save module popup form
         SAVE_WIDGET_BTN.on('click.charts.save', saveWidget);
         // Edit existing modules
@@ -883,6 +943,34 @@ var jsondash = function() {
             }
             deleteRow(row);
         });
+
+        // register stacked modals
+        $(document).on('show.bs.modal', '.modal', function (event) {
+            var showingModal = $(this);
+            var prevModal = showingModal.closest('.modal-dialog');
+
+            if (prevModal.length == 0) { // maybe it is the config modal
+                if (showingModal.is(EDIT_MODAL)) {
+                    return;
+                } else {
+                    prevModal = EDIT_MODAL;
+                }
+            }
+
+            showingModal.data('prev-modal', prevModal);
+            prevModal.addClass('side-modal');
+            prevModal.addClass('side-modal-animation');
+       });
+
+        $(document).on('hide.bs.modal', '.modal', function(){
+            var hiddingModal = $(this);
+            var prevModal = hiddingModal.data('prev-modal');
+            if (prevModal !== undefined) {
+                prevModal.removeClass('side-modal');
+                hiddingModal.data('previous-dialog', undefined);
+            }
+        });
+
     }
 
     function initFixedDragDrop(options) {

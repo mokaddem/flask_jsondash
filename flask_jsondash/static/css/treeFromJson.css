@@ -64,7 +64,7 @@
     margin-left: 10px;
 }
 
-.treeFromJson .mappingTableDivConfig input.fillValue {
+.treeFromJson input.fillValue {
     padding: 3px 6px;
     height: 26px;
     font-size: small;
@@ -146,6 +146,13 @@
 .treeFromJson .jsonDiv {
     overflow: scroll;
     margin-bottom: 0px !important;
+}
+
+.treeFromJson .mappingInput {
+    font-weight: normal;
+    font-style: italic;
+    font-size: inherit !important;
+    color: black;
 }
 
 .treeFromJson #mappingOverwrite {

@@ -180,6 +180,143 @@ jsondash.util.getDigitSize = function() {
     return scale;
 };
 
+
+/**
+ * [applyMapping read the config, and apply the proxyMapping if needed.
+ */
+jsondash.util.getPickingList = function(configType) {
+    var pickingList;
+    switch (configType) {
+        case 'timeseries':
+            pickingList = {
+                dates: { instructions: '.dates', strategy: 'date' },
+                labels: { instructions: '.@labels', strategy: 'label' },
+                values: { instructions: '.@labels.@@dates', strategy: 'value' }
+            };
+            break;
+        default:
+            pickingList = {
+                labels: { instructions: '.@labels', strategy: 'label' },
+                values: { instructions: '.@>labels.', strategy: 'value' }
+            };
+    }
+    return pickingList;
+}
+
+
+/**
+ * [applyMapping read the config, and apply the proxyMapping if needed.
+ */
+jsondash.util.applyMapping = function(config, data) {
+    var result = {
+        error: false,
+        data: {}
+    }
+
+    // functions
+    var mappingFun = config.proxyMappingFun;
+    var mapFunctions = {};
+    for (var k in mappingFun) {
+        var funT = mappingFun[k];
+        mapFunctions[k] = new Function('value', 'datum', funT);
+    }
+    
+    var pickingList = jsondash.util.getPickingList(config);
+    switch (config.type) {
+        case 'timeseries':
+            mapFunctions.dates = new Function('value', 'datum', 'var d=new Date(value*1000); return d.toISOString().split("T")[0];');
+            break;
+        default:
+    }
+
+    // mapping
+    var mapping = config.proxyMapping;
+    if (mapping !== undefined && mapping !== null && typeof mapping !== "string" && Object.keys(mapping).length > 0) {
+        var options = {
+            fillValue: 0,
+            functions: mapFunctions
+        };
+        var mappedData = new $.proxyMapper(mapping, pickingList, data, options);
+        result.data = mappedData;
+    } else if (typeof mapping === "string") { // mapping function overwrite
+        var options = {
+            overwriteMappingFunction: mapping
+        };
+        var mappedData = new $.proxyMapper({}, pickingList, data, options);
+        result.data = mappedData;
+    } else { // verify format
+        result.data = data;
+        if (data.dates !== undefined && data.dates.length > 0 && data.length > 1) {
+            // all fine, proceed to the ploting
+        } else {
+            result.error = {};
+            result.error.status = false;
+            result.error.statusText = 'Input data does not match expected format.';
+        }
+    }
+
+    return result;
+}
+
+/**
+ * [quickModal create a modal, open it and destroy it on closing
+ */
+jsondash.util.quickModal = function(header, body, options, callbackFun) {
+    switch (options.size) {
+        case 'sm':
+            size = 'modal-sm';
+            break;
+        case 'md':
+            size = '';
+            break;
+        case 'lg':
+            size = 'modal-lg';
+            break;
+        case 'xl':
+            size = 'modal-xl';
+            break;
+        case 'xxl':
+            size = 'modal-xxl';
+            break;
+        default:
+            size = '';
+    }
+    var modalId = 'quickmodal-' + jsondash.util.s4();
+    var html =  '<div id="'+modalId+'" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirm-modal" aria-hidden="true">';
+        html += '<div class="modal-dialog '+size+'">';
+            html += '<div class="modal-content">';
+                html += '<div class="modal-header">';
+                    html += '<a class="close" data-dismiss="modal">×</a>';
+                    html += '<h4>'+header+'</h4>'
+                html += '</div>';
+                html += '<div class="modal-body">';
+                    html += body;
+                html += '</div>';
+                html += '<div class="modal-footer">';
+                    html += '<span class="btn btn-success" data-dismiss="modal">Save</span>';
+                    html += '<span class="btn btn-primary" data-dismiss="modal">Close</span>';
+                html += '</div>';
+            html += '</div>';
+        html += '</div>';
+    html += '</div>';
+    $('body').append(html);
+    jModal = $('#'+modalId);
+    jModal.modal();
+    jModal.modal('show');
+
+    jModal.on('hidden.bs.modal', function (e) {
+        $(this).remove();
+    });
+    if (callbackFun !== undefined) {
+        var btn = jModal.find('.btn-success');
+        btn.click(function(e) {
+            var modal = $(e.target).parent().parent();
+            callbackFun(e, modal);
+        })
+    }
+    return jModal;
+};
+
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = jsondash;
 }

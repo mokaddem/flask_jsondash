@@ -12,6 +12,28 @@ body {
     left: 10px;
 }
 
+/* Stacked modal */
+.side-modal-animation {
+    -webkit-transition: all .15s linear;
+    -ms-transition: all .15s linear;
+    -o-transition: all .15s linear;
+    transition: all .15s linear;
+}
+.side-modal {
+    transform3d();
+    -webkit-transform: perspective(2000px) rotateY(40deg) scale(0.8) translateZ(-200px);
+    -ms-transform: perspective(2000px) rotateY(40deg) scale(0.8) translateZ(-200px);
+    -o-transform: perspective(2000px) rotateY(40deg) scale(0.8) translateZ(-200px);
+    transform: perspective(2000px) rotateY(40deg) scale(0.8) translateZ(-200px);
+    z-index: 1039;
+}
+.modal-xl {
+    width: 1200px;
+}
+.modal-xxl {
+    width: 95vw;
+}
+
 /* Widgets */
 
 .dashboard-charts {

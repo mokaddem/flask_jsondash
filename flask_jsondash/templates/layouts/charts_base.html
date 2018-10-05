@@ -21,6 +21,7 @@
 
 <!-- APP CSS -->
 <link rel="stylesheet" href="{{ url_for('jsondash._static', filename='css/app.css') }}">
+<link rel="stylesheet" href="{{ url_for('jsondash._static', filename='css/treeFromJson.css') }}">
 <link rel="stylesheet" href="{{ url_for('jsondash._static', filename='css/overrides.css') }}">
 {% endblock %}
 
@@ -50,6 +51,8 @@
 <script src="{{ url_for('jsondash._static', filename='js/api.js') }}"></script>
 <script src="{{ url_for('jsondash._static', filename='js/handlers.js') }}"></script>
 <script src="{{ url_for('jsondash._static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('jsondash._static', filename='js/proxyMapper.js') }}"></script>
+<script src="{{ url_for('jsondash._static', filename='js/treeFromJson.js') }}"></script>
 {% endblock %}
 
 {% block jsondash_api_scripts %}{{ super() }}{% endblock %}
