@@ -760,7 +760,11 @@
 
             draw_mapping_table: function() {
                 var that = this;
-                this.mappingDomInput = $('<textarea id="mappingOverwrite" class="" placeholder="function(json) {&#10;    /* code to be entered in this input */&#10;    return json;&#10;}"></textarea>');
+                var mappingOverwrite_fun_head = $('<span><span style="color: mediumblue;">function</span> (json) {</span>');
+                var mappingOverwrite_fun_foot = $('<span>}</span>');
+                this.mappingDomInput = $('<textarea id="mappingOverwrite" class="" placeholder="    /* code to be entered in this input */&#10;    return json;"></textarea>');
+                this.mappingOverwrite_container = $('<div class="mappingOverwrite_container"></div>');
+
                 this.mappingDomTable = $('<table class="table mappingTable"></table>');
                 var thead = $('<thead></thead>')
                 var tbody = $('<tbody></tbody>')
@@ -807,22 +811,33 @@
                     .append($('<label class="fillValue">Fill value</label>'))
                     .append(this.fillValueDomInput);
                 var div = $('<div></div>');
-                div.append(this.mappingDomInput);
+                this.mappingOverwrite_container.append(mappingOverwrite_fun_head);
+                this.mappingOverwrite_container.append(this.mappingDomInput);
+                this.mappingOverwrite_container.append(mappingOverwrite_fun_foot);
+                div.append(this.mappingOverwrite_container);
                 div.append(this.mappingDomTable);
                 if (valueHeader !== undefined) {
                     valueHeader.append(configDiv);
                 }
                 this.container.prepend(div);
 
-                this.mappingDomInput.on('input', function() {
+                this.mappingDomInput.on('focusin', function() {
+                    // hide/show mappingTable if there is a value
+                    that.mappingDomTable.hide(200);
+                    $(this).parent().find('span').show(200);
+                    $(this).attr('rows', '10');
+                });
+                this.mappingDomInput.on('focusout', function() {
                     // hide/show mappingTable if there is a value
                     if (this.value !== undefined && this.value !== '') {
-                        that.mappingDomTable.hide(200);
-                        $(this).attr('rows', '10');
+                        return;
                     } else {
                         that.mappingDomTable.show(200);
+                        $(this).parent().find('span').hide(200);
                         $(this).attr('rows', '1');
                     }
+                });
+                this.mappingDomInput.on('input', function() {
                     that.update_result_tree();
                 });
                 this.fillValueDomInput.on('input', function() {

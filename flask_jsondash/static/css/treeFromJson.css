@@ -150,7 +150,12 @@
 
 .treeFromJson #mappingOverwrite {
     color: black;
-    width: 100%;
+    width: 50%;
     margin-bottom: 5px;
+    margin-left: 20px;
     display: block;
+}
+
+.treeFromJson .mappingOverwrite_container span {
+    display: none;
 }
