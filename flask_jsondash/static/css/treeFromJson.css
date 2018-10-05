@@ -44,7 +44,7 @@
 }
 
 .treeFromJson table.mappingTable {
-    display: inline-table !important;
+    display: inline-table;
     cursor: pointer;
     margin-bottom: 5px;
     min-width: 50%;
@@ -146,4 +146,11 @@
 .treeFromJson .jsonDiv {
     overflow: scroll;
     margin-bottom: 0px !important;
+}
+
+.treeFromJson #mappingOverwrite {
+    color: black;
+    width: 100%;
+    margin-bottom: 5px;
+    display: block;
 }

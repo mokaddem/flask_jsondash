@@ -67,6 +67,7 @@
             this._default_options = {
                 fillValue: 0,
                 functions: funcs,
+                overwriteMappingFunction: null,
                 datum: false // the tree data to walk in parallel
             };
             this.options = $.extend({}, this._default_options, options);
@@ -77,7 +78,12 @@
                 that.mappingToIndexes[item] = {};
             });
 
-            this.perform_mapping();
+            if (this.options.overwriteMappingFunction === undefined || this.options.overwriteMappingFunction === null) {
+                this.perform_mapping();
+            } else {
+                var overwriteMappingFunction = new Function('json', this.options.overwriteMappingFunction);
+                this.result = overwriteMappingFunction(this.data);
+            }
             return this.result;
         };
 
@@ -240,7 +246,7 @@
                             v = that.mappingToIndexes[kn_strip][v];
                             if (v !== undefined) { // otherwise, could not fetch date (not same branch)
                                 directValue = true;
-                            } 
+                            }
                         } else {
                             if (kn.substring(0, 2) === '@>') {
                                 kn = '@' + kn.slice(2);
@@ -248,7 +254,11 @@
                             }
                             kn_strip = kn.slice(1);
                             v = additionalData[kn];
-                            v = v !== undefined ? v : instructions;
+                            if (v === undefined && Number.isInteger(instructions)) {
+                                v = instructions;
+                            } else {
+                                directValue = true;
+                            }
                             // apply transformation function, only for non-index
                             v = that.options.functions[kn_strip](v, additionalData.datum);
                         }
@@ -396,7 +406,11 @@
                 });
 
                 if (trueValue) {
-                    p_res[p_key] = value;
+                    if (this.isObject(value)) {
+                        $.extend(p_res, value);
+                    } else {
+                        p_res[p_key] = value;
+                    }
                 } else {
                     if (this.isObject(cres) && p_key !== undefined) {
                         p_res[p_key] = [];

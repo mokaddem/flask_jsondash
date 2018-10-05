@@ -44,6 +44,7 @@
             );
 
             this.itemColors = new Map(); // the map from item to color
+            this.mappingDomInput; // link to the jquery object of the mapping table
             this.mappingDomTable; // link to the jquery object of the mapping table
             this.currentPicking; // the selected entry to be picked
             this.currentPickingCell; // link th the jquery object of the table's cell being picked
@@ -759,6 +760,7 @@
 
             draw_mapping_table: function() {
                 var that = this;
+                this.mappingDomInput = $('<textarea id="mappingOverwrite" class="" placeholder="function(json) {&#10;    /* code to be entered in this input */&#10;    return json;&#10;}"></textarea>');
                 this.mappingDomTable = $('<table class="table mappingTable"></table>');
                 var thead = $('<thead></thead>')
                 var tbody = $('<tbody></tbody>')
@@ -805,12 +807,24 @@
                     .append($('<label class="fillValue">Fill value</label>'))
                     .append(this.fillValueDomInput);
                 var div = $('<div></div>');
+                div.append(this.mappingDomInput);
                 div.append(this.mappingDomTable);
                 if (valueHeader !== undefined) {
                     valueHeader.append(configDiv);
                 }
                 this.container.prepend(div);
 
+                this.mappingDomInput.on('input', function() {
+                    // hide/show mappingTable if there is a value
+                    if (this.value !== undefined && this.value !== '') {
+                        that.mappingDomTable.hide(200);
+                        $(this).attr('rows', '10');
+                    } else {
+                        that.mappingDomTable.show(200);
+                        $(this).attr('rows', '1');
+                    }
+                    that.update_result_tree();
+                });
                 this.fillValueDomInput.on('input', function() {
                     that.update_result_tree();
                 });
@@ -909,15 +923,24 @@
                 });
 
                 // perform mapping
+                var result;
                 var pm_options = {
                     fillValue: this.fillValueDomInput.val(),
                     functions: functions,
                     datum: this.root,
                     prefillData: this.prefillData,
                 };
-                var adjustedInstructions = this.adjust_instruction();
                 var constructionInstruction = this.options.toBeMapped;
-                var result = new $.proxyMapper(adjustedInstructions, constructionInstruction, this.data, pm_options);
+                var overwriteFunctionValue = this.mappingDomInput.val();
+                if (overwriteFunctionValue !== undefined && overwriteFunctionValue !== '') {
+                    pm_options.overwriteMappingFunction = overwriteFunctionValue;
+                    try {
+                        result = new $.proxyMapper({}, constructionInstruction, this.data, pm_options);
+                    } catch (e) { /* do nothing; */ }
+                } else {
+                    var adjustedInstructions = this.adjust_instruction();
+                    result = new $.proxyMapper(adjustedInstructions, constructionInstruction, this.data, pm_options);
+                }
 
                 // destroy and redraw
                 this.treeDivResult[0].innerHTML = '';
@@ -1152,7 +1175,12 @@
             },
 
             getMapping: function() {
-                return this.adjust_instruction();
+                var overwriteFunctionValue = this.mappingDomInput.val();
+                if (overwriteFunctionValue !== undefined && overwriteFunctionValue !== '') {
+                    return overwriteFunctionValue;
+                } else {
+                    return this.adjust_instruction();
+                }
             },
 
             util: {
