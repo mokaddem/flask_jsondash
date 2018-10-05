@@ -1190,12 +1190,22 @@
             },
 
             getMapping: function() {
+                var response = {};
+                // Get mapping
                 var overwriteFunctionValue = this.mappingDomInput.val();
                 if (overwriteFunctionValue !== undefined && overwriteFunctionValue !== '') {
-                    return overwriteFunctionValue;
+                    response.mapping = overwriteFunctionValue;
                 } else {
-                    return this.adjust_instruction();
+                    response.mapping = this.adjust_instruction();
                 }
+                // Get functions
+                response.functions = {};
+                $('.mappingTable textarea').each(function() {
+                    var ref = $(this).attr('id');
+                    var f_body = $(this).val();
+                    response.functions[ref] = f_body;
+                });
+                return response;
             },
 
             util: {
